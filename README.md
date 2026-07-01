@@ -105,7 +105,7 @@ Before you begin, ensure you have:
 - Python 3.9 or higher
 - Docker (optional)
 - [Ollama](https://ollama.ai/) installed (for local LLM support)
-- OpenAI API key (optional, for cloud LLM)
+- GROQ API key (optional, for cloud LLM)
 
 ### 2️⃣ Clone the Repository
 
