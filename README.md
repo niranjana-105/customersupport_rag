@@ -131,7 +131,7 @@ pip install -r requirements.txt
 
 Create a `.env` file with your settings:
 ```env
-OPENAI_API_KEY=your_api_key_here  # Optional
+GROQ_API_KEY=your_api_key_here  # Optional
 LANGCHAIN_API_KEY=your_api_key_here # Optional
 LANGCHAIN_TRACING_V2= true # Optional
 LANGCHAIN_PROJECT=your_project_id_here # Optional
