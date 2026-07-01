@@ -29,7 +29,7 @@ Built with **FastAPI, FAISS, LangGraph, and Ollama**, this system efficiently pr
 | Category | Tools Used |
 |----------|------------|
 | **Programming** | `Python 3.9+` |
-| **LLM Integration** | `LangChain`, `Ollama`, `OpenAI API (optional)` |
+| **LLM Integration** | `LangChain`, `Ollama`, `GROQ API (optional)` |
 | **Vector Search** | `FAISS` |
 | **Workflow Orchestration** | `LangGraph` |
 | **Backend Framework** | `FastAPI` |
