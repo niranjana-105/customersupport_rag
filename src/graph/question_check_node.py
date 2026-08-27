@@ -64,6 +64,6 @@ def question_check_node(state: AgentState) -> Dict[str, Any]:
 if __name__ == "__main__":
     state = {"question": "What is the capital of France?"}
 
-    scan_prompt_injection(state)
-    scan_toxicity(state)
-    scan_token_limit(state)
+    print(scan_prompt_injection(state))
+    print(scan_toxicity(state))
+    print(scan_token_limit(state))

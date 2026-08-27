@@ -17,10 +17,6 @@ class AgentState(TypedDict):
     documents: List[str]
     answer_status: list
     answer_valid: bool
-    llm_output: str
-    prompt: str
-    answer_valid: bool
-    answer_status: list
 
     """
 

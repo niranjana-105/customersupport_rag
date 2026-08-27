@@ -9,7 +9,7 @@ import os
 import random
 from uuid import uuid4
 
-from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
 from llm_guard.input_scanners import PromptInjection, TokenLimit, Toxicity
 from loguru import logger
 from ragas import EvaluationDataset, evaluate
@@ -27,7 +27,12 @@ def setup_components():
     retriever = load_faiss_index()
     rag_app = create_workflow(retriever, input_scanners=input_scanners)
 
-    llm = ChatOpenAI(model=settings.LLM_MODEL_NAME, temperature=0.0, max_tokens=1000)
+    llm = ChatGroq(
+    model="llama-3.3-70b-versatile",
+    api_key=settings.GROQ_API_KEY,
+    temperature=0.0,
+    max_tokens=1000,
+    )
     evaluator_llm = LangchainLLMWrapper(llm)
 
     return retriever, rag_app, evaluator_llm
