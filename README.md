@@ -29,7 +29,7 @@ Built with **FastAPI, FAISS, LangGraph, and Ollama**, this system efficiently pr
 | Category | Tools Used |
 |----------|------------|
 | **Programming** | `Python 3.9+` |
-| **LLM Integration** | `LangChain`, `Ollama`, `OpenAI API (optional)` |
+| **LLM Integration** | `LangChain`, `Ollama`, `GROQ API (optional)` |
 | **Vector Search** | `FAISS` |
 | **Workflow Orchestration** | `LangGraph` |
 | **Backend Framework** | `FastAPI` |
@@ -105,7 +105,7 @@ Before you begin, ensure you have:
 - Python 3.9 or higher
 - Docker (optional)
 - [Ollama](https://ollama.ai/) installed (for local LLM support)
-- OpenAI API key (optional, for cloud LLM)
+- GROQ API key (optional, for cloud LLM)
 
 ### 2️⃣ Clone the Repository
 
@@ -131,7 +131,7 @@ pip install -r requirements.txt
 
 Create a `.env` file with your settings:
 ```env
-OPENAI_API_KEY=your_api_key_here  # Optional
+GROQ_API_KEY=your_api_key_here  # Optional
 LANGCHAIN_API_KEY=your_api_key_here # Optional
 LANGCHAIN_TRACING_V2= true # Optional
 LANGCHAIN_PROJECT=your_project_id_here # Optional
@@ -210,43 +210,4 @@ The system follows this process for each query:
 
 ---
 
-## 🤝 Contributing
 
-We welcome contributions! Here's how you can help:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/improvement`)
-3. Make your changes
-4. Commit (`git commit -am 'Add new feature'`)
-5. Push (`git push origin feature/improvement`)
-6. Create a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- [LangChain](https://github.com/hwchase17/langchain) - LLM framework
-- [LangGraph](https://github.com/hwchase17/langgraph) - Workflow orchestration
-- [FastAPI](https://fastapi.tiangolo.com/) - API framework
-- [FAISS](https://github.com/facebookresearch/faiss) - Vector similarity search
-- [Ollama](https://ollama.ai/) - Local LLM support
-
----
-
-## ⭐ Star This Repo!
-
-If you find this project useful, please consider giving it a star! 🌟
-
----
-
-## 📩 Contact
-
-For questions or feedback, please open an issue in the repository.
-
----
