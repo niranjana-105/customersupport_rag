@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 import torch
 import torch._inductor.config
@@ -15,49 +15,54 @@ relevance_scanner = Relevance(use_onnx=True)
 sentiment_scanner = Sentiment(threshold=-1.0)
 
 
-def check_language_same(state: AgentState) -> Dict[str, Any]:
-    """Run LanguageSame check."""
+def check_language_same(state: AgentState) -> dict[str, Any]:
+    """Run LanguageSame check. Returns 0 (pass) or 1 (fail)."""
     output = state["llm_output"]
     prompt = state["prompt"]
     _, results_valid, _ = scan_output(
         scanners=[language_same_scanner], output=output, prompt=prompt
     )
-    same_language = not results_valid.get("LanguageSame", True)
-    return {"answer_status": [1 if same_language else 0]}
+    is_same = results_valid.get("LanguageSame", True)
+    return {"answer_status": [0 if is_same else 1]}
 
 
-def check_relevance(state: AgentState) -> Dict[str, Any]:
-    """Run Relevance check"""
+def check_relevance(state: AgentState) -> dict[str, Any]:
+    """Run Relevance check. Returns 0 (pass) or 1 (fail)."""
     output = state["llm_output"]
     prompt = state["prompt"]
     _, results_valid, _ = scan_output(
         scanners=[relevance_scanner], output=output, prompt=prompt
     )
-    relevant_answer = not results_valid.get("Relevance", True)
-    return {"answer_status": [1 if relevant_answer else 0]}
+    is_relevant = results_valid.get("Relevance", True)
+    return {"answer_status": [0 if is_relevant else 1]}
 
 
-def check_sentiment(state: AgentState) -> Dict[str, Any]:
-    """Run Sentiment check"""
+def check_sentiment(state: AgentState) -> dict[str, Any]:
+    """Run Sentiment check. Returns 0 (pass) or 1 (fail)."""
     output = state["llm_output"]
     prompt = state["prompt"]
     _, results_valid, _ = scan_output(
         scanners=[sentiment_scanner], output=output, prompt=prompt
     )
-    sentiment = not results_valid.get("Sentiment", True)
-    return {"answer_status": [1 if sentiment else 0]}
+    is_positive = results_valid.get("Sentiment", True)
+    return {"answer_status": [0 if is_positive else 1]}
 
 
-def answer_check_node(state: AgentState) -> Dict[str, Any]:
-    """Run all answer checks"""
+def answer_check_node(state: AgentState) -> dict[str, Any]:
+    """
+    Aggregate output scanner results from the last 3 status entries.
+    Explicitly returns answer_valid in the output dict so it propagates
+    correctly through the LangGraph state — do NOT mutate state in-place.
+    """
     answer_status = state["answer_status"]
     answer = state["llm_output"]
     all_checks_passed = all(status == 0 for status in answer_status[-3:])
     if all_checks_passed:
-        state["answer_valid"] = True
-        return {"llm_output": answer}
-    state["answer_valid"] = False
-    return {"llm_output": "Answer failed checks, please try again."}
+        return {"llm_output": answer, "answer_valid": True}
+    return {
+        "llm_output": "The generated answer did not pass safety checks. Please try a different question.",
+        "answer_valid": False,
+    }
 
 
 if __name__ == "__main__":

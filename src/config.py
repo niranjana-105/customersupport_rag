@@ -1,8 +1,8 @@
 """Configuration settings for the project."""
+from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Union
 
 from dotenv import load_dotenv
 from pydantic import SecretStr
@@ -15,7 +15,9 @@ class Settings(BaseSettings):
     """Project settings."""
 
     model_config = SettingsConfigDict(
-        env_file="./.env", env_file_encoding="utf-8", extra="allow"
+        env_file=str(Path(__file__).resolve().parent.parent / ".env"),
+        env_file_encoding="utf-8",
+        extra="allow",
     )
 
     # Base paths
@@ -35,21 +37,28 @@ class Settings(BaseSettings):
     # Embeddings settings
     EMBEDDINGS_MODEL_NAME: str = "sentence-transformers/all-MiniLM-L6-v2"
 
+    # LLM selection
+    USE_LOCAL_LLM: bool = False
+    GROQ_MODEL_NAME: str = "openai/gpt-oss-20b"
+
     # LLM settings
     LLM_MODEL_NAME: str = "gpt-4o-mini"
     LLM_TEMPERATURE: float = 0
-    LLM_MAX_TOKENS: int = 100
+    LLM_MAX_TOKENS: int = 1024
 
     # Local LLM settings
     OLLAMA_MODEL_NAME: str = "llama3.2:3b"
+
+    # Debug settings
+    DEBUG: bool = False
 
     FAISS_INDEX_PATH: str = str(INDEX_DIR / "faiss_index.faiss")
 
     FAISS_TOP_K: int = 5
 
     # Open AI API settings
-    OPENAI_API_KEY: Union[SecretStr, None] = None
-    GROQ_API_KEY: Union[SecretStr, None] = None
+    OPENAI_API_KEY: SecretStr | None = None
+    GROQ_API_KEY: SecretStr | None = None
     # Evaluation settings
     EVALUATION_SAMPLE_SIZE: int = 10
     EVALUATION_OUTPUT_DIR: str = str(BASE_DIR / "evaluation_results")

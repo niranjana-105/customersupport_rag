@@ -1,9 +1,9 @@
-from typing import Any, Dict
+from typing import Any
 
 from src.graph.state import AgentState
 
 
-def retrieve(state: AgentState, faiss_retriever) -> Dict[str, Any]:
+def retrieve(state: AgentState, faiss_retriever) -> dict[str, Any]:
     """
     Retrieve documents from the FAISS index.
 

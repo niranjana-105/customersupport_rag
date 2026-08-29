@@ -8,9 +8,11 @@ try:
     from langchain.globals import set_debug
 except ImportError:
     def set_debug(x): pass
+from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 
 # local imports
+from src.config import settings
 from src.graph.answer_check_node import (
     answer_check_node,
     check_language_same,
@@ -30,11 +32,17 @@ from src.graph.state import AgentState
 from src.graph.topic_check_node import topic_classifier
 from src.graph.utils import load_faiss_index
 
-set_debug(True)
+set_debug(settings.DEBUG)
 
 
-def create_workflow(retriever):
-    """Create a workflow."""
+def create_workflow(retriever, checkpointer=None):
+    """
+    Create a workflow with an optional checkpointer for multi-turn conversation memory.
+    If checkpointer is None, defaults to an in-memory MemorySaver.
+    Pass checkpointer=False for stateless compilation.
+    """
+    if checkpointer is None:
+        checkpointer = MemorySaver()
     workflow = StateGraph(AgentState)
     workflow.add_node(
         "scan_prompt_injection",
@@ -86,9 +94,10 @@ def create_workflow(retriever):
     workflow.add_edge("check_language_same", "answer_check_node")
     workflow.add_edge("check_relevance", "answer_check_node")
     workflow.add_edge("check_sentiment", "answer_check_node")
-    workflow.add_edge("answer_check_node", END)
-
-    graph = workflow.compile()
+    if checkpointer:
+        graph = workflow.compile(checkpointer=checkpointer)
+    else:
+        graph = workflow.compile()
     return graph
 
 

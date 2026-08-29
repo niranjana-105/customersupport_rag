@@ -22,9 +22,9 @@ def load_faiss_index() -> FAISS:
             embeddings_model,
             allow_dangerous_deserialization=True,
         )
-    except Exception as e:
+    except Exception:
         logger.exception("Failed to load FAISS index.")
-        raise e
+        raise
 
     retriever = vector_store.as_retriever(
         search_type="similarity",

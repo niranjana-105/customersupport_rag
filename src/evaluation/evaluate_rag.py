@@ -10,7 +10,6 @@ import random
 from uuid import uuid4
 
 from langchain_groq import ChatGroq
-from llm_guard.input_scanners import PromptInjection, TokenLimit, Toxicity
 from loguru import logger
 from ragas import EvaluationDataset, evaluate
 from ragas.llms import LangchainLLMWrapper
@@ -23,15 +22,15 @@ from src.graph.utils import load_faiss_index
 
 def setup_components():
     """Initialize all required components for RAG evaluation."""
-    input_scanners = [PromptInjection(), TokenLimit(), Toxicity()]
     retriever = load_faiss_index()
-    rag_app = create_workflow(retriever, input_scanners=input_scanners)
+    # create_workflow only accepts retriever — scanners are handled internally
+    rag_app = create_workflow(retriever)
 
     llm = ChatGroq(
-    model="llama-3.3-70b-versatile",
-    api_key=settings.GROQ_API_KEY,
-    temperature=0.0,
-    max_tokens=1000,
+        model=settings.GROQ_MODEL_NAME,
+        api_key=settings.GROQ_API_KEY,
+        temperature=0.0,
+        max_tokens=1000,
     )
     evaluator_llm = LangchainLLMWrapper(llm)
 
@@ -83,7 +82,7 @@ def prepare_evaluation_data(retriever, rag_app):
 
             logger.info(f"Processed {i}/{len(sampled_docs)}")
 
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             logger.info(f"Error processing document {i}: {e}")
             continue
 

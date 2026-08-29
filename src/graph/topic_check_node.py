@@ -1,27 +1,18 @@
 from functools import lru_cache
-from typing import Any, Dict, Literal
 
+from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_ollama import ChatOllama
-from pydantic import BaseModel, Field
 from langchain_groq import ChatGroq
+from langchain_ollama import ChatOllama
 
 from src.config import settings
 from src.graph.state import AgentState
 
 
-# Structured output for topic classification
-class GradeTopic(BaseModel):
-    """Structured output for topic classification."""
-
-    score: Literal["Yes", "No"] = Field(
-        description="Whether the question is about customer support."
-    )
-
-
 @lru_cache(maxsize=100)
-def classify_topic(question: str, local_llm: bool = False) -> Dict[str, Any]:
-    system = """You are a grader assessing whether a user's question is related to customer support 
+def classify_topic(question: str, local_llm: bool = False) -> str:
+    """Return 'Yes' if the question is customer-support-related, else 'No'."""
+    system = """You are a grader assessing whether a user's question is related to customer support
     for a product or a purchase.
     Customer support topics include:
     - Questions about purchasing products (e.g., "How do I place an order?")
@@ -30,7 +21,7 @@ def classify_topic(question: str, local_llm: bool = False) -> Dict[str, Any]:
     - Questions about product issues (e.g., "My product is not working.")
     - Questions about account issues (e.g., "I can't log in to my account.")
 
-    If the question is about customer support, respond with "Yes". Otherwise, respond with "No".
+    Respond with ONLY the single word "Yes" or "No". Do not add any explanation.
     """
 
     grade_prompt = ChatPromptTemplate.from_messages(
@@ -47,33 +38,36 @@ def classify_topic(question: str, local_llm: bool = False) -> Dict[str, Any]:
             max_tokens=settings.LLM_MAX_TOKENS,
         )
     else:
-    
         llm = ChatGroq(
-            model="llama-3.3-70b-versatile",
+            model=settings.GROQ_MODEL_NAME,
             api_key=settings.GROQ_API_KEY,
             temperature=settings.LLM_TEMPERATURE,
             max_tokens=settings.LLM_MAX_TOKENS,
         )
 
-    # Use structured output for better results
-    structured_llm = llm.with_structured_output(GradeTopic)
-    grader_llm = grade_prompt | structured_llm
-    result = grader_llm.invoke({"question": question})
-    return result
+    chain = grade_prompt | llm | StrOutputParser()
+    raw = chain.invoke({"question": question}).strip()
+    # Robust parsing: take the first word and normalize
+    first_word = raw.split()[0].strip(".,!?\"'").capitalize() if raw else "No"
+    return first_word if first_word in ("Yes", "No") else "No"
 
 
 def topic_classifier(state: AgentState):
     """Classify the topic of the question."""
     question = state["question"]
-    result = classify_topic(question)
-    print(result)
+    score = classify_topic(question, local_llm=settings.USE_LOCAL_LLM)
 
-    # Default to "on topic" if confidence is low
-    # state["on_topic"] = result.score
-    if result.score == "Yes":
+    if score == "Yes":
         return {"on_topic": "Yes"}
     else:
+        bot_reply = "Please ask a question about customer support so I can help you better."
+        new_history = [
+            {"role": "user", "content": question},
+            {"role": "assistant", "content": bot_reply},
+        ]
         return {
             "on_topic": "No",
-            "llm_output": "Please ask a question about customer support so I can help you better.",
+            "llm_output": bot_reply,
+            "chat_history": new_history,
         }
+
